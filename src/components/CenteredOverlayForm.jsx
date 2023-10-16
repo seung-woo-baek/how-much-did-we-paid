@@ -1,7 +1,3 @@
 export const CenteredOverlayForm = () => {
-  return (
-    <div>
-      CenteredOverlayForm component
-    </div>
-  )
-}
+  return <div>CenteredOverlayForm component</div>;
+};
