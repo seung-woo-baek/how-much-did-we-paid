@@ -4,6 +4,9 @@ import { groupMembersState } from '../state/groupMembers';
 import styled from 'styled-components';
 import { Button } from 'react-bootstrap';
 import { StyledTitle } from './AddExpencseForm';
+import { useRef } from 'react';
+import { Download } from 'react-bootstrap-icons';
+import { toPng } from 'html-to-image';
 
 export const calculateMinimumTransaction = (
   expenses,
@@ -68,6 +71,7 @@ export const calculateMinimumTransaction = (
 };
 
 export const SettlementSummary = () => {
+  const wrapperElement = useRef(null);
   const expenses = useRecoilValue(expensesState);
   const members = useRecoilValue(groupMembersState);
 
@@ -87,8 +91,28 @@ export const SettlementSummary = () => {
     splitAmount
   );
 
+  const exportToImage = () => {
+    if (wrapperElement.current === null) {
+      return;
+    }
+
+    toPng(wrapperElement.current, {
+      filter: (node) => node.tagName !== 'BUTTON',
+    })
+      .then((dataURL) => {
+        const link = document.createElement('a');
+        link.download = 'settlement-summary.png';
+        link.href = dataURL;
+
+        link.click();
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  };
+
   return (
-    <StyledWrapper>
+    <StyledWrapper ref={wrapperElement}>
       <StyledTitle>2. 정산은 이렇게!</StyledTitle>
       {totalExpenseAmount > 0 && groupMembersCount > 0 && (
         <>
@@ -108,11 +132,29 @@ export const SettlementSummary = () => {
               </li>
             ))}
           </StyledUl>
+          <StyledButton data-testid="btn-download" onClick={exportToImage}>
+            <Download />
+          </StyledButton>
         </>
       )}
     </StyledWrapper>
   );
 };
+
+const StyledButton = styled(Button)`
+  background: none;
+  border: none;
+  font-size: 25px;
+  position: absolute;
+  top: 15px;
+  right: 15px;
+
+  &:hover,
+  &:active {
+    background: none;
+    color: #683ba1;
+  }
+`;
 
 const StyledWrapper = styled.div`
   padding: 1.5em;

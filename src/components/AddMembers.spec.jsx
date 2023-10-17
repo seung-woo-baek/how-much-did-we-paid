@@ -2,12 +2,15 @@ import { render, screen } from '@testing-library/react';
 import { RecoilRoot } from 'recoil';
 import { AddMembers } from './AddMembers';
 import userEvent from '@testing-library/user-event';
+import { BrowserRouter } from 'react-router-dom';
 
 const renderComponent = () => {
   render(
-    <RecoilRoot>
-      <AddMembers />
-    </RecoilRoot>
+    <BrowserRouter>
+      <RecoilRoot>
+        <AddMembers />
+      </RecoilRoot>
+    </BrowserRouter>
   );
 
   const input = screen.getByTestId('input-member-names');
@@ -32,7 +35,9 @@ describe('그룹 멤버 추가 페이지', () => {
 
     await userEvent.click(saveButton);
 
-    const errorMessage = await screen.findByText('그룹 멤버들의 이름을 입력해 주세요.');
+    const errorMessage = await screen.findByText(
+      '그룹 멤버들의 이름을 입력해 주세요.'
+    );
     expect(errorMessage).toBeInTheDocument();
   });
 
@@ -42,7 +47,9 @@ describe('그룹 멤버 추가 페이지', () => {
     await userEvent.type(input, '철수 영희 영수');
     await userEvent.click(saveButton);
 
-    const errorMessage = screen.queryByText('그룹 멤버들의 이름을 입력해 주세요.');
+    const errorMessage = screen.queryByText(
+      '그룹 멤버들의 이름을 입력해 주세요.'
+    );
     expect(errorMessage).toBeNull();
   });
 });

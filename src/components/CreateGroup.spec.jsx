@@ -2,12 +2,15 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CreateGroup } from './CreateGroup';
 import { RecoilRoot } from 'recoil';
+import { BrowserRouter } from 'react-router-dom';
 
 const renderComponent = () => {
   render(
-    <RecoilRoot>
-      <CreateGroup />
-    </RecoilRoot>
+    <BrowserRouter>
+      <RecoilRoot>
+        <CreateGroup />
+      </RecoilRoot>
+    </BrowserRouter>
   );
 
   const input = screen.getByPlaceholderText('2023 제주도 여행');

@@ -1,8 +1,9 @@
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import { RecoilRoot } from 'recoil';
 import { ExpenseMain } from './ExpenseMain';
 import userEvent from '@testing-library/user-event';
 import { groupMembersState } from '../state/groupMembers';
+import { BrowserRouter } from 'react-router-dom';
 
 const renderComponent = () => {
   render(
@@ -119,9 +120,11 @@ describe('비용 정산 메인 페이지', () => {
       await userEvent.selectOptions(payerInput, '철수');
       await userEvent.click(addButton);
     };
-    test('날짜, 내용, 결제자, 금액 테이터가 정산 리스트에 추가 된다.', async () => {
-      await addNewExpense();
 
+    beforeEach(async () => {
+      await addNewExpense();
+    });
+    test('날짜, 내용, 결제자, 금액 테이터가 정산 리스트에 추가 된다.', () => {
       const expenseListComponent = screen.getByTestId('expenseList');
       const dateValue = within(expenseListComponent).getByText('2023-10-17');
       const descValue = within(expenseListComponent).getByText('장보기');
@@ -134,14 +137,32 @@ describe('비용 정산 메인 페이지', () => {
       expect(payerValue).toBeInTheDocument();
     });
 
-    test('정산 결과가 업데이트가 된다.', async () => {
-      await addNewExpense();
-
+    test('정산 결과가 업데이트가 된다.', () => {
       const totalText = screen.getByText(/2명 - 총 30000 원 지출/i);
       expect(totalText).toBeInTheDocument();
 
       const transactionText = screen.getByText(/영희 → 철수 : 15000 원/i);
       expect(transactionText).toBeInTheDocument();
+    });
+
+    const htmlToImage = require('html-to-image');
+    test('정산 결과를 이미지 파일로 저장할 수 있다.', async () => {
+      const spiedToPng = jest.spyOn(htmlToImage, 'toPng');
+
+      const downloadBtn = screen.getByTestId('btn-download');
+      expect(downloadBtn).toBeInTheDocument();
+
+      await waitFor(() => {
+        expect(downloadBtn).toBeInTheDocument();
+      });
+
+      userEvent.click(downloadBtn);
+      await waitFor(() => {
+        expect(spiedToPng).toHaveBeenCalledTimes(1);
+      });
+    });
+    afterEach(() => {
+      jest.resetAllMocks();
     });
   });
 });
